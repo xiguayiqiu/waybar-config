@@ -1,7 +1,5 @@
 # 预览
-<video width="800" controls poster="cover.jpg"> <!-- cover.jpg和MD/视频同目录 -->
-  <source src="rec/waybar.mp4" type="video/mp4">
-</video>
+![waybar](rec/waybar.gif)
 ---
 重要提示！本配置只适合Arch的Niri和Hyprland用户！
 
