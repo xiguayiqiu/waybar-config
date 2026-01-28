@@ -1,0 +1,190 @@
+@define-color bg-primary      #1e1e2e;
+@define-color bg-secondary    #282838;
+@define-color bg-transparent  rgba(30,30,46,0.85);
+@define-color fg-primary      #cdd6f4;
+@define-color fg-secondary    #a6adc8;
+@define-color accent          #89b4fa;
+@define-color critical        #f38ba8;
+@define-color success         #a6e3a1;
+@define-color border-color    #313244;
+
+window#waybar {
+    background: @bg-transparent;
+    border: 1px solid @border-color;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    margin: 0px;
+    padding: 0 4px;
+}
+
+#waybar > box {
+    border: none;
+    background: transparent;
+}
+
+.modules-left, .modules-center, .modules-right {
+    padding: 0 1px;
+}
+
+#waybar widget > * {
+    padding: 0 4px;
+    border-radius: 4px;
+    color: @fg-primary;
+    font-family: "Noto Sans CJK SC", "Font Awesome 6 Free", monospace;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+#waybar widget > *:hover {
+    background: @bg-secondary;
+    color: @accent;
+}
+
+#workspaces {
+    padding: 0 2px;
+}
+#workspaces button {
+    min-width: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: @fg-secondary;
+    font-size: 12px;
+}
+#workspaces button.active {
+    background: @accent;
+    color: @bg-primary;
+    font-weight: bold;
+}
+#workspaces button:hover {
+    background: @bg-secondary;
+    color: @accent;
+}
+
+#custom-cava {
+    padding: 0 3px;
+    font-size: 14px;
+    color: @accent;
+}
+
+#temperature {
+    font-weight: 500;
+}
+#temperature.critical {
+    color: @critical;
+    font-weight: bold;
+    animation: pulse 1.5s infinite alternate;
+}
+
+#custom-pkg-count {
+    color: @success;
+    font-weight: 500;
+}
+
+#clock {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0 6px;
+    color: @fg-primary;
+}
+#clock:hover {
+    background: @bg-secondary;
+    color: @fg-primary;
+}
+
+#custom-net-speed {
+    font-size: 12px;
+    color: @fg-secondary;
+}
+
+#network {
+    font-weight: 500;
+}
+#network.disconnected {
+    color: @critical;
+}
+#network.ethernet {
+    color: @success;
+}
+
+#custom-memory {
+    font-size: 16px;
+    padding: 0 2px;
+    color: @accent;
+}
+#custom-memory:hover {
+    background: transparent;
+}
+
+#cpu {
+    font-weight: 500;
+}
+#cpu:hover {
+    color: @critical;
+}
+
+#wireplumber {
+    font-size: 20px;
+    padding: 0 3px;
+    min-width: 70px;
+}
+#wireplumber.muted {
+    color: @fg-secondary;
+    font-style: italic;
+}
+
+#backlight {
+    min-width: 60px;
+}
+#backlight icon {
+    color: @success;
+}
+
+#tray {
+    background: @bg-primary;
+    padding: 0 2px;
+    margin: 0 1px;
+}
+#tray > .passive {
+    opacity: 0.7;
+}
+#tray > .needs-attention {
+    color: @critical;
+    animation: pulse 1s infinite alternate;
+}
+#tray icon {
+    margin: 0 1px;
+}
+#battery {
+    font-weight: 500;
+    min-width: 70px;
+    padding: 0 4px;
+}
+#battery:not(.charging):not(.full) {
+    color: @accent;
+}
+#battery.charging, #battery.plugged {
+    color: @success;
+}
+#battery.critical:not(.charging) {
+    color: @critical;
+    font-weight: bold;
+    animation: pulse 1.5s infinite alternate;
+}
+#battery:hover {
+    background: @bg-secondary;
+    color: @fg-primary;
+}
+@keyframes pulse {
+    from { opacity: 1; }
+    to { opacity: 0.7; }
+}
+tooltip {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 12px;
+}

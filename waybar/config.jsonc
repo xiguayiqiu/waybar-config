@@ -1,0 +1,168 @@
+{
+  //基本配置
+  "layer": "top",
+  "height": 30,
+  "margin": "0.4px",
+  "mainbar": {
+  "tooltip": true
+    },
+  "modules-left": [
+    "hyprland/workspaces",
+    "custom/cava",
+    "temperature",
+    "custom/pkg-count",
+    "disk"
+  ],
+  "modules-center": [
+    "clock",
+    "custom/net-speed" 
+  ],
+  "modules-right": [
+    "custom/memory",
+    "cpu",
+    "wireplumber",
+    "backlight",
+    "network",
+    "battery",
+    "tray"
+  ],
+  //磁盘用量组件
+   "disk": {
+    "interval": 30,
+    "format": " {percentage_used}% ({specific_used:.2f} GiB)",
+    "path": "/",
+    "unit": "GiB",
+    "tooltip": true,
+    "tooltip-format": "{used} used out of {total} on {path} ({percentage_used}%)",
+    "max-length": 25,
+    "states": [
+      {
+        "state": "warning",
+        "value": 80
+      },
+      {
+        "state": "critical",
+        "value": 90
+      }
+    ],
+    "on-click": "kitty -e ncdu /",
+    "on-click-right": "nautilus /"
+  },
+  //电池组件
+    "battery": {
+    "interval": 30,          
+    "states": {
+      "critical": 20,              
+      "warning": 30,
+      "good": 80,
+      "full": 100
+    },
+   "format": "{icon} {capacity}%",
+    "format-charging": "{icon} {capacity}%",
+    "format-plugged": "{icon} {capacity}%",
+    "format-critical": "{icon} {capacity}% ⚡",
+    "format-icons": ["", "", "", "", ""]  
+},
+  //亮度组件
+   "backlight": {
+    "device": "intel_backlight",
+    "format": "{icon} {percent}%",
+    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "on-scroll-up": "brightnessctl set +5%",
+    "on-scroll-down": "brightnessctl set 5%-",
+    "interval": 2,
+    "tooltip": true,
+    "tooltip-format": "亮度：{percent}%"
+  },
+  //包统计组件
+  "custom/pkg-count": {
+  "exec": "/home/yiqiu/.config/waybar/scripts/pkg-count.sh",
+  "interval": 1,
+  "format": "{}",
+  "return-type": "text"
+},
+  //网速组件
+   "custom/net-speed": {
+        "exec": "~/.config/waybar/scripts/net-speed.sh",
+        "interval": 1,
+        "format": "{}",
+        "tooltip": true,
+        "return-type": "json"
+    },
+  //温度组件
+  "temperature": {
+    "thermal-zone": 0,
+    "hwmon-path": "/sys/class/hwmon/hwmon*/temp*_input",
+    "critical-threshold": 80,
+    "format": "{temperatureC}°C ",
+    "format-critical": "{temperatureC}°C ",
+    "interval": 2,
+    "on-click": "sensors"
+},
+  //网络组件
+    "network": {
+        "interface-types": ["ethernet", "wifi"],
+        "ignore": ["lo", "docker*"],
+        "format-ethernet": " 有线",
+        "format-wifi": "{essid} {signalStrength}% ",
+        "format-disconnected": "󰤮 无网络",
+        "format-linked": "",
+        "interval": 5
+    },
+  //声音组件
+    "wireplumber": {
+    "format": "{icon} {volume}%",
+    "format-muted": " 静音",
+    "format-icons": ["", "", ""],
+    "on-scroll-up": "wpctl set-volume --limit 1.0 @DEFAULT_SINK@ 5%+ unmute",
+    "on-scroll-down": "wpctl set-volume @DEFAULT_SINK@ 5%- unmute",
+    "on-click": "wpctl set-mute @DEFAULT_SINK@ toggle",
+    "interval": 300,
+    "tooltip": true,
+    "tooltip-format": "当前音量: {volume}%"
+  },
+  //系统托盘
+  "tray": {
+    "icon-size": 16,
+    "spacing": 4,
+    "margin": 2,
+    "background": "#1e1e2e",
+    "tooltip": true,
+    "icon-theme": "Papirus"
+  },
+  //时钟配置
+  "clock": {
+    "format": "{:%Y-%m-%d %H:%M:%S}",
+    "interval": 1,
+    "escape-markup": false,
+    "tooltip-format": "{}",
+    "tooltip-exec": "/usr/bin/cal",
+    "interval": 1,
+    "timezone": "Asia/Shanghai"
+  },
+  //内存显示
+  "custom/memory": {
+    "exec": "~/.config/waybar/scripts/memory-bars.sh",
+    "exec-if": "which free && which bash",
+    "interval": 0,
+    "on-click": "~/.config/waybar/scripts/memory-bars.sh toggle",
+    "format": "{}",
+    "tooltip": true,
+    "tooltip-format": "内存使用率: {}%",
+    "font-size": 16,
+    "padding": 4
+  },
+  //CPU使用率
+  "cpu": {
+    "format": " {usage}%",
+    "interval": 2
+  },
+  //CAVA
+  "custom/cava": {
+    "exec": "~/.config/waybar/scripts/cava_waybar.sh",
+    "return-type": "json",
+    "interval": 0,
+    "tooltip": false,
+    "format": "{}"
+  }
+}
