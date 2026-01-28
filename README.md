@@ -1,5 +1,5 @@
 # 预览
-![waybar](rec/waybar.gif)
+![waybar](rec/waybar.mp4)
 
 ---
 重要提示！本配置只适合Arch的Niri和Hyprland用户！
