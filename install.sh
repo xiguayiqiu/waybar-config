@@ -1,9 +1,12 @@
-#!bin/bash
+#!/bin/bash
+# 获取脚本所在的绝对路径（解决cp路径找不到的核心问题）
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 echo "开始安装~"
 sleep 1
 echo "正在安装依赖..."
-sudo pacman -S --noconfirm waybar procps-ng iproute2 bc pipewire wireplumber pulseaudio-utils cava ttf-font-awesome ttf-jetbrains-mono-nerd ttf-noto-sans-cjk-sc
-echo "正在备份文件..."
+# 修正Arch Linux正确包名：pulseaudio-utils→pulseaudio，ttf-noto-sans-cjk-sc→noto-fonts-cjk
+sudo pacman -S --noconfirm waybar procps-ng iproute2 bc pipewire wireplumber pulseaudio cava ttf-font-awesome ttf-jetbrains-mono-nerd noto-fonts-cjk mako ttf-jetbrains-mono
+echo "正在准备备份文件..."
 sleep 1
 # ===================== 配置区（可根据需要修改） =====================
 # 要备份的目标文件夹（相对~/.config的路径）
@@ -22,7 +25,7 @@ cd "$HOME" || {
   exit 1
 }
 
-# 检查并创建备份目录
+# 检查并创建备份目录（仅创建，失败才终止，因后续无依赖）
 if [ ! -d "$BACKUP_DIR" ]; then
   echo "提示：备份目录 $BACKUP_DIR 不存在，正在创建..."
   mkdir -p "$BACKUP_DIR" || {
@@ -31,46 +34,60 @@ if [ ! -d "$BACKUP_DIR" ]; then
   }
 fi
 
-# 检查要备份的文件夹是否存在
-missing_targets=()
+# 核心步骤1：筛选出~/.config下**实际存在**的目标目录
+exist_targets=()
 for target in "${BACKUP_TARGETS[@]}"; do
-  if [ ! -d "$HOME/.config/$target" ]; then
-    missing_targets+=("$target")
+  target_path="$HOME/.config/$target"
+  if [ -d "$target_path" ]; then
+    exist_targets+=("$target")
   fi
 done
 
-# 如果有文件夹不存在，给出提示但继续执行（避免因单个文件夹缺失导致备份失败）
-if [ ${#missing_targets[@]} -gt 0 ]; then
-  echo "警告：以下文件夹不存在，将跳过备份：${missing_targets[*]}"
-fi
-
-# 执行备份（使用tar打包并压缩）
-echo "开始备份 ~/.config 下的指定文件夹到 $BACKUP_DIR/$BACKUP_FILENAME..."
-tar -czf "$BACKUP_DIR/$BACKUP_FILENAME" \
-  --exclude="*.log" \
-  --exclude="*.tmp" \
-  "${BACKUP_TARGETS[@]/#/.config/}" || {
-  echo "错误：备份过程失败"
-  exit 1
-}
-
-# 验证备份文件是否生成
-if [ -f "$BACKUP_DIR/$BACKUP_FILENAME" ]; then
-  # 显示备份文件大小（人性化格式）
-  FILE_SIZE=$(du -h "$BACKUP_DIR/$BACKUP_FILENAME" | awk '{print $1}')
-  echo "✅ 备份成功！"
-  echo "备份文件路径：$BACKUP_DIR/$BACKUP_FILENAME"
-  echo "备份文件大小：$FILE_SIZE"
+# 核心步骤2：无实际备份目标则跳过备份，直接执行后续
+if [ ${#exist_targets[@]} -eq 0 ]; then
+  echo "提示：~/.config下无需要备份的目录，跳过备份步骤"
 else
-  echo "❌ 备份失败：未生成备份文件"
-  exit 1
+  echo "提示：将备份以下目录：${exist_targets[*]}"
+  # 执行备份（失败不终止，仅提示）
+  echo "开始备份 ~/.config 下的指定文件夹到 $BACKUP_DIR/$BACKUP_FILENAME..."
+  tar -czf "$BACKUP_DIR/$BACKUP_FILENAME" \
+    --exclude="*.log" \
+    --exclude="*.tmp" \
+    "${exist_targets[@]/#/.config/}"
+
+  # 验证备份结果（仅提示，不终止）
+  if [ -f "$BACKUP_DIR/$BACKUP_FILENAME" ]; then
+    FILE_SIZE=$(du -h "$BACKUP_DIR/$BACKUP_FILENAME" | awk '{print $1}')
+    echo "✅ 备份成功！"
+    echo "备份文件路径：$BACKUP_DIR/$BACKUP_FILENAME"
+    echo "备份文件大小：$FILE_SIZE"
+  else
+    echo "⚠️  备份警告：备份文件未生成，跳过备份，继续执行后续步骤"
+  fi
 fi
 
-exit 0
-sleep 1
+# 后续步骤：不受备份结果影响，正常执行
 echo "正在复制文件..."
-rm -r ~/.config/cava/ ~/.config/mako/ ~/.config/waybar
-cp -r {cava,mako,waybar} ~/.config/
+# 强制删除原有目录（不存在则无操作，不报错）
+rm -rf ~/.config/cava/ ~/.config/mako/ ~/.config/waybar
+
+# 检查脚本目录下的配置目录是否存在，避免cp报错
+missing_configs=()
+for dir in "cava" "mako" "waybar"; do
+  if [ ! -d "$SCRIPT_DIR/$dir" ]; then
+    missing_configs+=("$dir")
+  fi
+done
+
+if [ ${#missing_configs[@]} -gt 0 ]; then
+  echo "⚠️  警告：脚本目录下缺少以下配置目录，跳过复制：${missing_configs[*]}"
+else
+  # 用脚本绝对路径复制，解决"找不到文件"问题
+  cp -r "$SCRIPT_DIR"/{cava,mako,waybar} ~/.config/
+  echo "✅ 配置文件复制成功！"
+fi
+
+# 启用并立即启动mako服务
 systemctl enable --now mako.service
 sleep 1
 echo "安装完成！"
@@ -79,9 +96,9 @@ echo "✅ 任务已全部执行完成！"
 echo "💡 按下[回车键|ENTER] 将立即重启系统，按 Ctrl+C 取消重启"
 echo "========================================\n"
 
-# 等待用户按下回车键（无输入要求，仅等待回车）
+# 等待用户确认（无输入要求，仅等待回车）
 read -p "请确认是否重启：" -r
 
-# 用户按下回车后执行重启（需root权限，sudo确保重启生效）
+# 执行重启（sudo确保权限）
 echo -e "\n🔄 正在重启系统...\n"
 sudo reboot
